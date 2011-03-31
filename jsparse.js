@@ -87,7 +87,7 @@ ParseState.prototype.putCached = function(pid, cached) {
     }
 }
 
-function ps(str) {
+exports.ps = function (str) {
     return new ParseState(str);
 }
 
@@ -143,7 +143,7 @@ function ch(c) {
 // 'range' is a parser combinator that returns a single character parser
 // (similar to 'ch'). It parses single characters that are in the inclusive
 // range of the 'lower' and 'upper' bounds ("a" to "z" for example).
-function range(lower, upper) {
+exports.range = function (lower, upper) {
     var pid = parser_id++;
     return function(state) {
         var savedState = state;
@@ -190,7 +190,7 @@ function whitespace(p) {
 
 // Parser combinator that passes the AST generated from the parser 'p'
 // to the function 'f'. The result of 'f' is used as the AST in the result.
-function action(p, f) {
+var action = exports.action = function (p, f) {
     var p = toParser(p);
     var pid = parser_id++;
     return function(state) {
@@ -336,7 +336,7 @@ function wsequence() {
 // It takes any number of parsers as arguments and returns a parser that will try
 // each of the given parsers in order. The first one that succeeds results in a
 // successfull parse. It fails if all parsers fail.
-function choice() {
+var choice = exports.choice = function () {
     var parsers = [];
     for(var i = 0; i < arguments.length; ++i)
         parsers.push(toParser(arguments[i]));
@@ -485,7 +485,7 @@ function repeat0(p) {
 
 // A parser combinator that takes one parser. It returns a parser that
 // looks for one or more matches of the original parser.
-function repeat1(p) {
+exports.repeat1 = function (p) {
     var p = toParser(p);
     var pid = parser_id++;
 
@@ -541,7 +541,7 @@ function expect(p) {
     return action(p, function(ast) { return undefined; });
 }
 
-function chain(p, s, f) {
+var chain = exports.chain = function (p, s, f) {
     var p = toParser(p);
 
     return action(sequence(p, repeat0(action(sequence(s, p), f))),
@@ -553,7 +553,7 @@ function chain(p, s, f) {
 // of the form: function(lhs,rhs) { return x; }
 // Where 'x' is the result of applying some operation to the lhs and rhs AST's from the item
 // parser.
-function chainl(p, s) {
+var chainl = exports.chainl = function (p, s) {
     var p = toParser(p);
     return action(sequence(p, repeat0(sequence(s, p))),
                   function(ast) {

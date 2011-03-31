@@ -33,16 +33,18 @@
 // Forward definitions required due to lack of laziness in JS 
 var Expr = function(state) { return Expr(state); }
 
+var js = require('./jsparse');
+
 var Number = 
-    action(repeat1(range('0','9')), 
+    js.action(js.repeat1(js.range('0','9')), 
 	   function(ast) {
 	       return parseInt(ast.join(""));
 	   });
-var Value = choice(Number, Expr);
+var Value = js.choice(Number, Expr);
 
 function operator_action(p, func) 
 {
-    return action(p, function(ast) { return func; });
+    return js.action(p, function(ast) { return func; });
 }
 
 var Times = operator_action('*', function(lhs,rhs) { return lhs*rhs; });
@@ -50,8 +52,9 @@ var Divides = operator_action('/', function(lhs,rhs) { return lhs/rhs; });
 var Plus = operator_action('+', function(lhs,rhs) { return lhs+rhs; });
 var Minus = operator_action('-', function(lhs,rhs) { return lhs-rhs; });
 
-var Product = chainl(Value, choice(Times, Divides));
-var Sum = chainl(Product, choice(Plus, Minus));
+var Product = js.chainl(Value, js.choice(Times, Divides));
+var Sum = js.chainl(Product, js.choice(Plus, Minus));
 var Expr = Sum;
 
+exports.Expr = Expr;
 // Usage: Expr(ps("1+2*3-4"))
